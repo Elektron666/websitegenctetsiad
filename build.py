@@ -130,8 +130,16 @@ UYELIK_ALINTI = ("“Genç TETSİAD üyelik esaslı, kapalı bir platformdur. Ba
 # mağaza durumu — tasarımdaki storeStatus varsayılanı "Yakında"
 IOS_LABEL = "YAKINDA"
 ANDROID_LABEL = "YAKINDA"
-# taslak uyarıları — tasarımdaki draftNotes varsayılanı true
-DRAFT_NOTES = True
+# Onay durumları. Bir bölüm onaylandıkça ilgili bayrak False yapılır.
+DRAFT_BASKAN = False   # başkan mesajı — yönetim onayı alındı
+DRAFT_LEGAL  = True    # yasal metinler — hukuk danışmanı onayı bekliyor
+
+# İletişim bilgileri (dernek merkezi)
+ADRES_SATIR  = "Ömer Avni Mah. Meclis-i Mebusan Cd. No: 71 Kat: 6"
+ADRES_ILCE   = "34000 Beyoğlu / İstanbul"
+TELEFON      = "0553 252 46 53"
+TELEFON_HREF = "tel:+905532524653"
+DERNEK_UNVAN = "TETSİAD — Türkiye Ev Tekstili Sanayicileri ve İş İnsanları Derneği"
 
 # --------------------------------------------------------------------------
 # YASAL METİNLER — tasarım dosyasından birebir, yeniden yazılmadı
@@ -140,10 +148,11 @@ DRAFT_NOTES = True
 GIZLILIK = [
     ("01", "Veri sorumlusu", [
         "Kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) "
-        "kapsamında veri sorumlusu olarak [TETSİAD — Türkiye Ev Tekstili Sanayicileri "
-        "ve İş İnsanları Derneği] tarafından, Genç TETSİAD komisyonu ve Genç TETSİAD "
+        "kapsamında veri sorumlusu olarak TETSİAD — Türkiye Ev Tekstili Sanayicileri "
+        "ve İş İnsanları Derneği tarafından, Genç TETSİAD komisyonu ve Genç TETSİAD "
         "mobil uygulaması bünyesinde işlenmektedir.",
-        "Adres: [dernek merkez adresi]. Elektronik posta: info@genctetsiad.org. Bu metin, "
+        "Adres: Ömer Avni Mah. Meclis-i Mebusan Cd. No: 71 Kat: 6, 34000 Beyoğlu / İstanbul. "
+        "Telefon: 0553 252 46 53. Elektronik posta: info@genctetsiad.org. Bu metin, "
         "genctetsiad.org web sitesi ve Genç TETSİAD uygulaması üzerinden yürütülen tüm "
         "veri işleme faaliyetlerini kapsar.",
     ], []),
@@ -211,8 +220,8 @@ KOSULLAR = [
         "Bu koşullar, genctetsiad.org web sitesinin ve Genç TETSİAD mobil uygulamasının "
         "kullanımına ilişkin şartları düzenler. Siteyi kullanan veya uygulamaya üye olan "
         "herkes bu koşulları kabul etmiş sayılır.",
-        "Site ve uygulama, [TETSİAD — Türkiye Ev Tekstili Sanayicileri ve İş İnsanları "
-        "Derneği] bünyesindeki Genç TETSİAD komisyonu tarafından işletilir.",
+        "Site ve uygulama, TETSİAD — Türkiye Ev Tekstili Sanayicileri ve İş İnsanları "
+        "Derneği bünyesindeki Genç TETSİAD komisyonu tarafından işletilir.",
     ], []),
     ("02", "Üyelik ve erişim", [
         "Genç TETSİAD üyelik esaslı, kapalı bir platformdur. Üyelik başvuruları uygulama "
@@ -364,7 +373,9 @@ FOOT = """
       <h2>İLETİŞİM</h2>
       <div class="links">
         <a class="mail" href="mailto:info@genctetsiad.org">info@genctetsiad.org</a>
+        <a href="__TELHREF__">__TELEFON__</a>
         <a class="ig-sm" href="https://www.instagram.com/genctetsiad/" target="_blank" rel="noopener noreferrer">__IG14__ @genctetsiad</a>
+        <span class="plain">__ADRES1__<br>__ADRES2__</span>
         <span class="plain">TETSİAD çatısı altında</span>
       </div>
     </div>
@@ -394,7 +405,11 @@ def shell(body, title, desc, canon, active=None, og_title=None):
             .replace("__CANON__", canon)
             .replace("__SITE__", SITE)
             .replace("__NAVLINKS__", "\n".join(links)))
-    foot = FOOT.replace("__IG14__", IG_SVG % (14, 14))
+    foot = (FOOT.replace("__IG14__", IG_SVG % (14, 14))
+                .replace("__TELHREF__", TELEFON_HREF)
+                .replace("__TELEFON__", TELEFON)
+                .replace("__ADRES1__", ADRES_SATIR)
+                .replace("__ADRES2__", ADRES_ILCE))
     return head + body + foot
 
 
@@ -406,8 +421,8 @@ def write(path, html):
     print("  %-42s %6.1f KB" % (path, len(html.encode("utf-8")) / 1024))
 
 
-def draft(text):
-    return '<p class="draft">%s</p>' % text if DRAFT_NOTES else ""
+def draft(text, show=True):
+    return '<p class="draft">%s</p>' % text if show else ""
 
 
 def badges():
@@ -558,7 +573,7 @@ def page_home():
    .replace("__BASKANFIG__", baskan_figure()) \
    .replace("__ALINTI__", BASKAN_ALINTI) \
    .replace("__MESAJ__", mesaj) \
-   .replace("__DRAFT1__", draft("TASLAK METİN — YÖNETİM ONAYI BEKLİYOR")) \
+   .replace("__DRAFT1__", draft("TASLAK METİN — YÖNETİM ONAYI BEKLİYOR", DRAFT_BASKAN)) \
    .replace("__PROG__", prog) \
    .replace("__FEATS__", feats) \
    .replace("__BADGES__", badges()) \
@@ -642,7 +657,7 @@ def page_about():
    .replace("__BASKANFIG__", baskan_figure("22px")) \
    .replace("__ALINTI__", BASKAN_ALINTI) \
    .replace("__MESAJ__", mesaj) \
-   .replace("__DRAFT1__", draft("TASLAK METİN — YÖNETİM ONAYI BEKLİYOR"))
+   .replace("__DRAFT1__", draft("TASLAK METİN — YÖNETİM ONAYI BEKLİYOR", DRAFT_BASKAN))
 
 
 # --------------------------------------------------------------------------
@@ -785,6 +800,14 @@ def page_contact():
   <section style="max-width:var(--wrap);margin:0 auto;padding:clamp(64px,8vw,100px) var(--pad) clamp(80px,10vw,120px)">
     <dl class="deflist">
       <div>
+        <dt>ADRES</dt>
+        <dd>__ADRES1__<br>__ADRES2__</dd>
+      </div>
+      <div>
+        <dt>TELEFON</dt>
+        <dd><a href="__TELHREF__">__TELEFON__</a></dd>
+      </div>
+      <div>
         <dt>ÇATI KURULUŞ</dt>
         <dd>TETSİAD — Türkiye Ev Tekstili Sanayicileri ve İş İnsanları Derneği</dd>
       </div>
@@ -802,10 +825,11 @@ def page_contact():
 </main>
 """.replace("__IG15__", IG_SVG % (15, 15)) \
    .replace("__TOPICS__", topics) \
-   .replace("__DRAFT__",
-            ('<p class="draft" style="margin:clamp(40px,5vw,56px) 0 0;padding-top:22px;'
-             'border-top:1px solid rgba(217,200,150,.12)">ADRES VE TELEFON YÖNETİMDEN GELİNCE EKLENECEK</p>')
-            if DRAFT_NOTES else "")
+   .replace("__ADRES1__", ADRES_SATIR) \
+   .replace("__ADRES2__", ADRES_ILCE) \
+   .replace("__TELHREF__", TELEFON_HREF) \
+   .replace("__TELEFON__", TELEFON) \
+   .replace("__DRAFT__", "")
 
 
 # --------------------------------------------------------------------------
@@ -832,11 +856,11 @@ def page_legal(kind):
                       '<div><h2>%s</h2>%s%s</div></section>' % (no, head, paras, lst))
 
     notice = ""
-    if DRAFT_NOTES:
+    if DRAFT_LEGAL:
         notice = ('<div class="notice"><p class="h">HUKUK ONAYI BEKLİYOR</p>'
                   '<p>Aşağıdaki metin taslaktır ve yayına alınmadan önce derneğin hukuk '
                   'danışmanı tarafından onaylanmalıdır. Köşeli parantez içindeki alanlar '
-                  '(unvan, adres, yetkili mahkeme) dernek kayıtlarından doldurulacaktır.</p></div>')
+                  '(yetkili mahkeme) dernek kayıtlarından doldurulacaktır.</p></div>')
 
     return """
 <main id="icerik" class="legal">

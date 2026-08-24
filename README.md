@@ -108,20 +108,24 @@ güncelleyin, yoksa sessizce bloklanır.
 
 ## Yayın öncesi kontrol listesi
 
-Brief'in uyardığı, **yönetim veya hukuk onayı bekleyen** maddeler. Sitede
-şu an ilgili yerlerde taslak uyarısı görünüyor; onaylar geldikçe hem içeriği
-güncelleyin hem de uyarıyı kaldırın (`build.py` içinde `DRAFT_NOTES = False`).
+Brief'in uyardığı maddeler. Onay durumu `build.py` başındaki bayraklarla
+yönetilir; bir bölüm onaylandığında ilgili bayrak `False` yapılıp
+`python3 build.py` çalıştırılır, taslak uyarısı sayfadan kalkar.
 
 - [ ] **1.500+ üye · 55 il · 40 ülke** — Uygulamada sabit yazılıydı, kaynağı
       belirsiz. Yönetime doğrulatın. Teyit edilemezse ana sayfadaki rakam
       şeridini tamamen kaldırın; yanlış rakam kurumsal sitede güven kaybettirir.
-- [ ] **Başkan mesajı** — Yönetim onayı bekliyor.
-- [ ] **Yasal metinler** — Dernek hukuk danışmanı onaylamalı. Metinlerdeki
-      köşeli parantezli alanlar dernek kayıtlarından doldurulacak:
-      `[TETSİAD — ... Derneği]` (tam tescilli unvan), `[dernek merkez adresi]`,
-      `[İstanbul]` (yetkili mahkeme).
-- [ ] **İletişim adresi ve telefon** — Yönetimden gelince iletişim sayfasına
-      eklenecek; şu an yalnızca e-posta ve Instagram var.
+- [x] **Başkan mesajı** — Yönetim onayı alındı; taslak uyarısı kaldırıldı
+      (`DRAFT_BASKAN = False`).
+- [ ] **Yasal metinler** — Dernek hukuk danışmanı onaylamalı
+      (`DRAFT_LEGAL = True`). Dernek unvanı ve merkez adresi dolduruldu;
+      geriye yalnızca kullanım koşullarındaki `[İstanbul]` (yetkili mahkeme)
+      kaldı — bu bir hukuk kararı olduğu için bilerek bırakıldı.
+- [x] **İletişim adresi ve telefon** — Eklendi: iletişim sayfası, alt bilgi ve
+      gizlilik politikasının veri sorumlusu bölümü. Değerler `build.py`
+      başındaki `ADRES_SATIR` / `ADRES_ILCE` / `TELEFON` sabitlerinden gelir.
+      Posta kodu `34000` dernekten geldiği gibi yazıldı; Beyoğlu için gerçek
+      kod farklı olabilir, teyit etmekte fayda var.
 - [ ] **Mağaza rozetleri** — Şu an ikisi de "YAKINDA" ve link vermiyor.
       Uygulama yayına girince `build.py` içindeki `IOS_LABEL` /
       `ANDROID_LABEL` değerlerini güncelleyip rozetleri gerçek mağaza
