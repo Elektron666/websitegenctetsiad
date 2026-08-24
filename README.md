@@ -1,3 +1,0 @@
-# Websitegenctetsiad
-
-Temiz bir başlangıç.
