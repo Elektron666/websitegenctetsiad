@@ -1,26 +1,86 @@
-# Apache — Netlify/Cloudflare dışı barındırma için
+# genctetsiad.org — Apache / cPanel yapılandırması
+# Bu dosya sitenin KÖK dizininde durmalı (public_html).
+
+# --- Dizin listeleme kapalı ------------------------------------------------
+# Olmazsa /assets/ gibi index.html içermeyen klasörlerin tüm dosya listesi
+# tarayıcıdan görülebilir.
+Options -Indexes
+
+# --- Güvenlik başlıkları ---------------------------------------------------
 <IfModule mod_headers.c>
   Header always set X-Frame-Options "DENY"
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+
+  # HTTPS zorunlu. Alan adı HTTPS'te çalışmadan önce bu satırı açmayın:
+  # tarayıcı bir yıl boyunca yalnızca HTTPS ile bağlanmayı hatırlar.
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+  # Site tamamen kendi kaynaklarından beslenir; dış istek yoktur.
+  # style-src 'unsafe-inline' gereklidir: düzen için satır içi style= kullanılıyor.
+  # script-src'deki hash, <head> içindeki tek satırlık .js sınıfı ekleyen script'e aittir.
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'sha256-/x7W7R75k8Roq0WaVRQX9blP4OufE5xbAdzklGxsgpw='; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+
+  # Sunucu yazılımı sürümünü sızdırmayı bırak
+  Header unset X-Powered-By
+  Header always unset X-Powered-By
 </IfModule>
 
+# --- HTTP -> HTTPS ve uzantısız adresler -----------------------------------
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  # /hakkimizda -> /hakkimizda/index.html
+
+  # Kaynak dosyalar hiçbir şekilde servis edilmez
+  RewriteRule ^_kaynak(/|$) - [F,L]
+
+  # HTTPS'e yönlendir
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+  # /hakkimizda  ->  /hakkimizda/index.html   (dizin gerçekten varsa)
   RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} -d
   RewriteCond %{REQUEST_FILENAME}/index.html -f
-  RewriteRule ^(.*)$ /$1/index.html [L]
+  RewriteRule ^(.+?)/?$ /$1/index.html [L]
 </IfModule>
 
-# Kaynak dosyalar (brief, ham fotoğraf, tasarım dosyası) yayına açılmaz.
-<IfModule mod_rewrite.c>
-  RewriteRule ^_kaynak/ - [F,L]
+# --- Gizli ve hassas dosyalara erişim yok ----------------------------------
+<IfModule mod_authz_core.c>
+  <FilesMatch "(^\.|\.(py|md|json|lock|yml|yaml|bak|log|sql|zip)$)">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+  <FilesMatch "(^\.|\.(py|md|json|lock|yml|yaml|bak|log|sql|zip)$)">
+    Order allow,deny
+    Deny from all
+  </FilesMatch>
+</IfModule>
+# .well-known ACME doğrulaması açık kalsın (SSL yenileme)
+<IfModule mod_alias.c>
+  RedirectMatch 404 /\.git(/|$)
+</IfModule>
+
+# --- MIME ve önbellek ------------------------------------------------------
+<IfModule mod_mime.c>
+  AddType font/woff2 .woff2
+  AddType image/webp .webp
 </IfModule>
 
 <IfModule mod_expires.c>
   ExpiresActive On
-  ExpiresByType image/webp "access plus 1 year"
-  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType font/woff2  "access plus 1 year"
+  ExpiresByType image/webp  "access plus 1 year"
+  ExpiresByType image/png   "access plus 1 year"
+  ExpiresByType text/css    "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/html   "access plus 1 hour"
 </IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml text/plain
+</IfModule>
+

@@ -88,6 +88,33 @@ bir `Content-Security-Policy`. CSP yalnızca kendi kaynaklarına ve Google
 Fonts'a izin verir; siteye yeni bir dış kaynak eklerseniz CSP'yi de
 güncelleyin, yoksa sessizce bloklanır.
 
+## Güvenlik
+
+Site tamamen statiktir: form gönderimi, veritabanı, oturum, çerez ve
+sunucu tarafı kod yoktur. Klasik web açıkları (SQL enjeksiyonu, XSS,
+CSRF, yetki atlatma) için gereken girdi yüzeyi bulunmaz.
+
+Alınan önlemler:
+
+- **Yazı tipleri yerel.** Google Fonts'a istek gitmez; ziyaretçinin IP
+  adresi üçüncü tarafa ulaşmaz. Sayfalar hiçbir dış alan adına bağlanmaz.
+- **CSP** `default-src 'self'` ile kilitli. `script-src` satır içi script'in
+  SHA-256 özetine bağlı, `'unsafe-inline'` içermez. `style-src` düzen için
+  satır içi `style=` kullanıldığından `'unsafe-inline'` içerir.
+- **Dizin listeleme kapalı** (`Options -Indexes`). Olmasaydı `/assets/`
+  altındaki her dosya tarayıcıdan listelenebilirdi.
+- **HTTPS zorunlu** ve HSTS bir yıl.
+- **Gizli ve kaynak dosyalar** (`.py`, `.md`, `.json`, nokta ile başlayanlar)
+  sunucudan servis edilmez; `_kaynak/` tümüyle reddedilir.
+- `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
+  `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`.
+- Dış bağlantılarda `rel="noopener noreferrer"`.
+- `build.py` içerik verisini HTML'e yazmadan önce kaçırır.
+
+**Tüm başlıklar `.htaccess`'ten gelir.** Dosya yüklenmezse veya
+`mod_headers` kapalıysa hiçbiri uygulanmaz — yükledikten sonra
+`bash guvenlik-testi.sh` çalıştırıp doğrulayın.
+
 ## Teknik notlar
 
 - **Çerez yok, analitik yok.** KVKK metni "üçüncü taraf izleme aracı

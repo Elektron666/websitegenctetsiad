@@ -268,6 +268,53 @@ KOSULLAR = [
 ]
 
 # --------------------------------------------------------------------------
+# HTML kaçışı
+#
+# İçerik sabitleri güvenilir (dış girdi yok), ama & < > karakterleri geçerli
+# HTML üretmek için kaçırılmalı. İleride metne "Ar-Ge & İnovasyon" gibi bir
+# ifade eklendiğinde çıktının bozulmaması için veri listeleri burada bir kez
+# normalleştirilir. Apostrof ve tırnak kaçırılmaz; metin içinde sorunsuzdur.
+# --------------------------------------------------------------------------
+
+import html as _html
+
+
+def _esc(v):
+    if isinstance(v, str):
+        return _html.escape(v, quote=False)
+    if isinstance(v, tuple):
+        return tuple(_esc(x) for x in v)
+    if isinstance(v, list):
+        return [_esc(x) for x in v]
+    return v
+
+
+def _esc_href(v):
+    """mailto: bağlantıları öznitelik içine girer; tırnak da kaçırılır."""
+    return _html.escape(v, quote=True)
+
+
+FAALIYETLER   = _esc(FAALIYETLER)
+PROBLEMLER    = _esc(PROBLEMLER)
+HEDEFLER      = _esc(HEDEFLER)
+KOMISYONLAR   = _esc(KOMISYONLAR)
+PROGRAMLAR    = _esc(PROGRAMLAR)
+AKADEMI       = _esc(AKADEMI)
+TAKVIM        = _esc(TAKVIM)
+BASKAN_MESAJ  = _esc(BASKAN_MESAJ)
+BASKAN_ALINTI = _esc(BASKAN_ALINTI)
+VIZYON        = _esc(VIZYON)
+MISYON        = _esc(MISYON)
+UYELIK_ALINTI = _esc(UYELIK_ALINTI)
+ADRES_SATIR   = _esc(ADRES_SATIR)
+ADRES_ILCE    = _esc(ADRES_ILCE)
+TELEFON       = _esc(TELEFON)
+KONULAR       = [(_esc(t), _esc_href(h), _esc(d)) for t, h, d in KONULAR]
+GIZLILIK      = [(_esc(n), _esc(t), _esc(b), _esc(i)) for n, t, b, i in GIZLILIK]
+KOSULLAR      = [(_esc(n), _esc(t), _esc(b), _esc(i)) for n, t, b, i in KOSULLAR]
+
+
+# --------------------------------------------------------------------------
 # İSKELET
 # --------------------------------------------------------------------------
 
@@ -312,9 +359,9 @@ HEAD = """<!doctype html>
 <link rel="icon" href="/assets/favicon.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Plus+Jakarta+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/plus-jakarta-sans-300-normal-latin.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/cormorant-garamond-300-italic-latin.woff2">
+<link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/assets/site.css">
 <script>document.documentElement.classList.add('js');</script>
 </head>
@@ -930,7 +977,8 @@ HEADERS_NETLIFY = """/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'sha256-/x7W7R75k8Roq0WaVRQX9blP4OufE5xbAdzklGxsgpw='; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
@@ -940,32 +988,92 @@ HEADERS_NETLIFY = """/*
   X-Robots-Tag: noindex, nofollow
 """
 
-HTACCESS = """# Apache — Netlify/Cloudflare dışı barındırma için
+HTACCESS = """# genctetsiad.org — Apache / cPanel yapılandırması
+# Bu dosya sitenin KÖK dizininde durmalı (public_html).
+
+# --- Dizin listeleme kapalı ------------------------------------------------
+# Olmazsa /assets/ gibi index.html içermeyen klasörlerin tüm dosya listesi
+# tarayıcıdan görülebilir.
+Options -Indexes
+
+# --- Güvenlik başlıkları ---------------------------------------------------
 <IfModule mod_headers.c>
   Header always set X-Frame-Options "DENY"
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+
+  # HTTPS zorunlu. Alan adı HTTPS'te çalışmadan önce bu satırı açmayın:
+  # tarayıcı bir yıl boyunca yalnızca HTTPS ile bağlanmayı hatırlar.
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+  # Site tamamen kendi kaynaklarından beslenir; dış istek yoktur.
+  # style-src 'unsafe-inline' gereklidir: düzen için satır içi style= kullanılıyor.
+  # script-src'deki hash, <head> içindeki tek satırlık .js sınıfı ekleyen script'e aittir.
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'sha256-/x7W7R75k8Roq0WaVRQX9blP4OufE5xbAdzklGxsgpw='; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+
+  # Sunucu yazılımı sürümünü sızdırmayı bırak
+  Header unset X-Powered-By
+  Header always unset X-Powered-By
 </IfModule>
 
+# --- HTTP -> HTTPS ve uzantısız adresler -----------------------------------
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  # /hakkimizda -> /hakkimizda/index.html
+
+  # Kaynak dosyalar hiçbir şekilde servis edilmez
+  RewriteRule ^_kaynak(/|$) - [F,L]
+
+  # HTTPS'e yönlendir
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+  # /hakkimizda  ->  /hakkimizda/index.html   (dizin gerçekten varsa)
   RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} -d
   RewriteCond %{REQUEST_FILENAME}/index.html -f
-  RewriteRule ^(.*)$ /$1/index.html [L]
+  RewriteRule ^(.+?)/?$ /$1/index.html [L]
 </IfModule>
 
-# Kaynak dosyalar (brief, ham fotoğraf, tasarım dosyası) yayına açılmaz.
-<IfModule mod_rewrite.c>
-  RewriteRule ^_kaynak/ - [F,L]
+# --- Gizli ve hassas dosyalara erişim yok ----------------------------------
+<IfModule mod_authz_core.c>
+  <FilesMatch "(^\\.|\\.(py|md|json|lock|yml|yaml|bak|log|sql|zip)$)">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+  <FilesMatch "(^\\.|\\.(py|md|json|lock|yml|yaml|bak|log|sql|zip)$)">
+    Order allow,deny
+    Deny from all
+  </FilesMatch>
+</IfModule>
+# .well-known ACME doğrulaması açık kalsın (SSL yenileme)
+<IfModule mod_alias.c>
+  RedirectMatch 404 /\\.git(/|$)
+</IfModule>
+
+# --- MIME ve önbellek ------------------------------------------------------
+<IfModule mod_mime.c>
+  AddType font/woff2 .woff2
+  AddType image/webp .webp
 </IfModule>
 
 <IfModule mod_expires.c>
   ExpiresActive On
-  ExpiresByType image/webp "access plus 1 year"
-  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType font/woff2  "access plus 1 year"
+  ExpiresByType image/webp  "access plus 1 year"
+  ExpiresByType image/png   "access plus 1 year"
+  ExpiresByType text/css    "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/html   "access plus 1 hour"
 </IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml text/plain
+</IfModule>
+
 """
 
 
