@@ -106,32 +106,37 @@ güncelleyin, yoksa sessizce bloklanır.
   gölgesiyle çizilir; böylece son satırda boş kalan ızgara gözü açık renk
   bir blok olarak görünmez.
 
-## Yayın öncesi kontrol listesi
+## Onay durumu
 
-Brief'in uyardığı maddeler. Onay durumu `build.py` başındaki bayraklarla
-yönetilir; bir bölüm onaylandığında ilgili bayrak `False` yapılıp
-`python3 build.py` çalıştırılır, taslak uyarısı sayfadan kalkar.
+Tüm bölümler dernek tarafından onaylandı; sitede taslak veya "onay bekliyor"
+uyarısı kalmadı. `build.py` başındaki bayraklar:
 
-- [ ] **1.500+ üye · 55 il · 40 ülke** — Uygulamada sabit yazılıydı, kaynağı
-      belirsiz. Yönetime doğrulatın. Teyit edilemezse ana sayfadaki rakam
-      şeridini tamamen kaldırın; yanlış rakam kurumsal sitede güven kaybettirir.
-- [x] **Başkan mesajı** — Yönetim onayı alındı; taslak uyarısı kaldırıldı
-      (`DRAFT_BASKAN = False`).
-- [ ] **Yasal metinler** — Dernek hukuk danışmanı onaylamalı
-      (`DRAFT_LEGAL = True`). Dernek unvanı ve merkez adresi dolduruldu;
-      geriye yalnızca kullanım koşullarındaki `[İstanbul]` (yetkili mahkeme)
-      kaldı — bu bir hukuk kararı olduğu için bilerek bırakıldı.
-- [x] **İletişim adresi ve telefon** — Eklendi: iletişim sayfası, alt bilgi ve
-      gizlilik politikasının veri sorumlusu bölümü. Değerler `build.py`
-      başındaki `ADRES_SATIR` / `ADRES_ILCE` / `TELEFON` sabitlerinden gelir.
-      Posta kodu `34000` dernekten geldiği gibi yazıldı; Beyoğlu için gerçek
-      kod farklı olabilir, teyit etmekte fayda var.
-- [ ] **Mağaza rozetleri** — Şu an ikisi de "YAKINDA" ve link vermiyor.
-      Uygulama yayına girince `build.py` içindeki `IOS_LABEL` /
-      `ANDROID_LABEL` değerlerini güncelleyip rozetleri gerçek mağaza
-      adreslerine bağlayın.
-- [ ] **Lighthouse** — Yayına alındıktan sonra gerçek alan adında ölçün.
-      Hedef: performans ve erişilebilirlik 90+.
+```python
+DRAFT_BASKAN = False   # başkan mesajı — onaylandı
+DRAFT_LEGAL  = False   # yasal metinler — onaylandı
+```
+
+Bir metin yeniden gözden geçirmeye açılırsa ilgili bayrağı `True` yapıp
+`python3 build.py` çalıştırmak uyarıyı geri getirir.
+
+Onaylanan içerik:
+
+- **Rakamlar** — 1.500+ üye · 55 il · 3 ülke. Ana sayfada hem rakam
+  şeridinde hem kapak metninde geçer; ikisi de `build.py` içinde.
+- **Başkan mesajı** — Resul Öden, üç paragraf.
+- **Yasal metinler** — gizlilik politikası ve kullanım koşulları. Dernek
+  unvanı, merkez adresi ve yetkili mahkeme (İstanbul) dolduruldu; köşeli
+  parantezli alan kalmadı.
+- **İletişim** — adres, telefon ve e-posta; iletişim sayfası, alt bilgi ve
+  gizlilik politikasının veri sorumlusu bölümünde.
+
+Yayın sonrası kalan tek teknik iş: **Lighthouse ölçümü**, gerçek alan adında
+ve gerçek sunucu başlıklarıyla. Hedef performans ve erişilebilirlikte 90+.
+
+Not: posta kodu `34000` dernekten geldiği gibi yazıldı. Beyoğlu için gerçek
+kod farklı olabilir; değişirse `build.py` içindeki `ADRES_ILCE` sabitini
+güncelleyip yeniden derleyin — adres hem sitede hem KVKK metninde bu
+sabitten gelir.
 
 ## Tasarımdan sapmalar
 

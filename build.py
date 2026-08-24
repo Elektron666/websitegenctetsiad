@@ -132,7 +132,7 @@ IOS_LABEL = "YAKINDA"
 ANDROID_LABEL = "YAKINDA"
 # Onay durumları. Bir bölüm onaylandıkça ilgili bayrak False yapılır.
 DRAFT_BASKAN = False   # başkan mesajı — yönetim onayı alındı
-DRAFT_LEGAL  = True    # yasal metinler — hukuk danışmanı onayı bekliyor
+DRAFT_LEGAL  = False   # yasal metinler — onaylandı
 
 # İletişim bilgileri (dernek merkezi)
 ADRES_SATIR  = "Ömer Avni Mah. Meclis-i Mebusan Cd. No: 71 Kat: 6"
@@ -263,7 +263,7 @@ KOSULLAR = [
         "bu sayfada yayımlandığı anda yürürlüğe girer; esaslı değişiklikler üyelere uygulama "
         "üzerinden ayrıca duyurulur.",
         "Bu koşullardan doğan uyuşmazlıklarda Türkiye Cumhuriyeti hukuku uygulanır ve "
-        "[İstanbul] mahkemeleri yetkilidir.",
+        "İstanbul mahkemeleri yetkilidir.",
     ], []),
 ]
 
@@ -480,7 +480,7 @@ def page_home():
     <div class="inner">
       <p class="lbl" style="margin-bottom:28px">TÜRKİYE EV TEKSTİLİ · GENÇ İŞ İNSANLARI</p>
       <h1>Değişim<br>gençlerle<br><span class="gold">olacak.</span></h1>
-      <p class="lede">Sektörün geleceğini gençlerle inşa etmek istiyoruz. 1.500'ü aşkın genç iş insanı, 55 ilde ve 40 ülkede.</p>
+      <p class="lede">Sektörün geleceğini gençlerle inşa etmek istiyoruz. 1.500'ü aşkın genç iş insanı, 55 ilde ve 3 ülkede.</p>
       <div class="actions">
         <a class="btn btn-solid" href="/uyelik">ÜYELİK BAŞVURUSU</a>
         <a class="btn btn-line" href="/hakkimizda">VİZYON VE MİSYON</a>
@@ -494,13 +494,12 @@ def page_home():
     <p class="body-t" style="max-width:720px;line-height:1.95;margin:clamp(48px,6vw,64px) 0 0">Genç TETSİAD, sektördeki gençleri bir araya getirerek onlara network oluşturmayı hedefler. Bunun yanı sıra etkinlikler, seminerler, ortak ticari çalışmalar, sosyal ve ticari buluşmalar yaparak genç bir tekstil zemini oluşturmayı hedefler.</p>
   </section>
 
-  <!-- Rakamlar yönetim teyidi bekliyor — bkz. README "Yayın öncesi kontrol listesi" -->
   <section class="stats" aria-label="Genç TETSİAD sayılarla">
     <div class="inner">
       <div class="grid">
         <div class="cell"><div class="num">1.500+</div><div class="cap">ÜYE</div></div>
         <div class="cell"><div class="num">55</div><div class="cap">İL</div></div>
-        <div class="cell"><div class="num">40</div><div class="cap">ÜLKE</div></div>
+        <div class="cell"><div class="num">3</div><div class="cap">ÜLKE</div></div>
       </div>
     </div>
   </section>
