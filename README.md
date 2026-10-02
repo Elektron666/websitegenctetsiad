@@ -78,6 +78,7 @@ Kopyalanmayacaklar: `_kaynak/`, `build.py`, `README.md`.
 
 | Barındırıcı | Dosya |
 |---|---|
+| Vercel | `vercel.json` + `.vercelignore` (hazır) |
 | Netlify, Cloudflare Pages | `_headers` (hazır) |
 | Apache, cPanel | `.htaccess` (hazır) |
 | Nginx | `_headers` içindeki değerleri `add_header` olarak taşıyın |

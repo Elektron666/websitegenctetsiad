@@ -1,0 +1,11 @@
+# Vercel'e yüklenmeyecekler: kaynak dosyalar, üreteç, belgeler
+_kaynak
+build.py
+README.md
+guvenlik-testi.sh
+_headers
+.htaccess
+assets/*.png
+!assets/favicon.png
+!assets/apple-touch-icon.png
+!assets/og.png
